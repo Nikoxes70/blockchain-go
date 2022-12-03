@@ -16,16 +16,16 @@ const (
 )
 
 type Blockchain struct {
-	TransactionPool   []*Transaction
-	Chain             []*Block
-	BlockchainAddress string
+	transactionPool   []*Transaction
+	chain             []*Block
+	blockchainAddress string
 	port              uint16
 }
 
 func NewBlockchain(blockchainAddress string, port uint16) (*Blockchain, error) {
 	b := &Block{}
 	bc := &Blockchain{
-		BlockchainAddress: blockchainAddress,
+		blockchainAddress: blockchainAddress,
 		port:              port,
 	}
 
@@ -38,6 +38,16 @@ func NewBlockchain(blockchainAddress string, port uint16) (*Blockchain, error) {
 }
 
 // Public
+
+func (bc *Blockchain) TransactonPool() []*Transaction {
+	return bc.transactionPool
+}
+
+func (bc *Blockchain) CreateTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
+	bc.AddTransaction(sender, recipient, value, pKey, s)
+	//Sync
+	return nil
+}
 
 func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
 	t := NewTransaction(sender, recipient, value)
@@ -55,12 +65,12 @@ func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pK
 		}
 	}
 
-	bc.TransactionPool = append(bc.TransactionPool, t)
+	bc.transactionPool = append(bc.transactionPool, t)
 	return nil
 }
 
 func (bc *Blockchain) Mine() (int64, error) {
-	err := bc.AddTransaction(BENEFACTOR_ADDRESS, bc.BlockchainAddress, MINING_REWARD, nil, nil)
+	err := bc.AddTransaction(BENEFACTOR_ADDRESS, bc.blockchainAddress, MINING_REWARD, nil, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -80,7 +90,7 @@ func (bc *Blockchain) Mine() (int64, error) {
 
 func (bc *Blockchain) CalculateBalance(address string) float32 {
 	var balance float32 = 0
-	for _, b := range bc.Chain {
+	for _, b := range bc.chain {
 		for _, t := range b.Transactions {
 			if t.recipient == address {
 				balance += t.value
@@ -95,8 +105,8 @@ func (bc *Blockchain) CalculateBalance(address string) float32 {
 }
 
 func (bc *Blockchain) Print() {
-	for i, block := range bc.Chain {
-		fmt.Printf("%s Chain %d %s\n", strings.Repeat("=", 25), i,
+	for i, block := range bc.chain {
+		fmt.Printf("%s chain %d %s\n", strings.Repeat("=", 25), i,
 			strings.Repeat("=", 25))
 		block.Print()
 	}
@@ -107,26 +117,26 @@ func (bc *Blockchain) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Blocks []*Block `json:"chains"`
 	}{
-		Blocks: bc.Chain,
+		Blocks: bc.chain,
 	})
 }
 
 // Private
 
 func (bc *Blockchain) createBlock(nonce int, previousHash [32]byte) *Block {
-	b := NewBlock(nonce, previousHash, bc.TransactionPool)
-	bc.Chain = append(bc.Chain, b)
-	bc.TransactionPool = []*Transaction{}
+	b := NewBlock(nonce, previousHash, bc.transactionPool)
+	bc.chain = append(bc.chain, b)
+	bc.transactionPool = []*Transaction{}
 	return b
 }
 
 func (bc *Blockchain) lastBlock() *Block {
-	return bc.Chain[len(bc.Chain)-1]
+	return bc.chain[len(bc.chain)-1]
 }
 
 func (bc *Blockchain) copyTransactionPool() []*Transaction {
-	transactions := make([]*Transaction, len(bc.TransactionPool))
-	for i, t := range bc.TransactionPool {
+	transactions := make([]*Transaction, len(bc.transactionPool))
+	for i, t := range bc.transactionPool {
 		transactions[i] = NewTransaction(t.sender, t.recipient, t.value)
 	}
 	return transactions

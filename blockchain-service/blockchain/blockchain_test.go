@@ -36,7 +36,7 @@ func Test_Blockchain(t *testing.T) {
 
 	err = bc.AddTransaction(itay.BlockchainAddress(), niko.BlockchainAddress(), 1.0, itay.PublicKey(), s)
 	if err != nil {
-		t.Errorf("Failed to AddTransaction with err: %s", err)
+		t.Errorf("Failed to CreateTransaction with err: %s", err)
 	}
 
 	block, err := bc.Mine()
@@ -50,27 +50,27 @@ func Test_Blockchain(t *testing.T) {
 		t.Errorf("Wrong calculation")
 	}
 	//
-	//bc.AddTransaction("Niko", "Itay", 1)
-	//bc.AddTransaction("Niko", "Itay", 2)
-	//bc.AddTransaction("Niko", "Itay", 3)
-	//bc.AddTransaction("Niko", "Itay", 4)
+	//bc.CreateTransaction("Niko", "Itay", 1)
+	//bc.CreateTransaction("Niko", "Itay", 2)
+	//bc.CreateTransaction("Niko", "Itay", 3)
+	//bc.CreateTransaction("Niko", "Itay", 4)
 	//bc.Mine()
 	//balance = bc.CalculateBalance("Niko")
 	//if balance != 10 {
 	//	t.Errorf("Wrong calculation")
 	//}
 	//
-	//bc.AddTransaction("Niko", "Itay", 1)
-	//bc.AddTransaction("Itay", "Niko", 4)
-	//bc.AddTransaction("Niko", "Itay", 5)
-	//bc.AddTransaction("Niko", "Itay", 1)
+	//bc.CreateTransaction("Niko", "Itay", 1)
+	//bc.CreateTransaction("Itay", "Niko", 4)
+	//bc.CreateTransaction("Niko", "Itay", 5)
+	//bc.CreateTransaction("Niko", "Itay", 1)
 	//bc.Mine()
 	//balance = bc.CalculateBalance("Niko")
 	//if balance != 7 {
 	//	t.Errorf("Wrong calculation")
 	//}
 	//
-	//bc.AddTransaction("Itay", "Niko", 10)
+	//bc.CreateTransaction("Itay", "Niko", 10)
 	//bc.Mine()
 	//
 	//balance = bc.CalculateBalance("Niko")

@@ -3,6 +3,7 @@ package blockchain_server
 import (
 	"blockchain/blockchain-service/blockchain"
 	"blockchain/blockchain-service/wallet"
+	"blockchain/foundation/cryptography"
 	"crypto/ecdsa"
 )
 
@@ -37,7 +38,29 @@ func (s *Server) GetBlockchain(address string) (*blockchain.Blockchain, error) {
 	return bc, nil
 }
 
-func (s *Server) AddTransaction(sender, receiver string, amount float32) (id string, err error) {
-	//TODO implement me
-	panic("implement me")
+func (s *Server) GetTransactions() ([]*blockchain.Transaction, error) {
+	bc, err := s.GetBlockchain("BLOCKCHAIN")
+	if err != nil {
+		return nil, err
+	}
+	return bc.TransactonPool(), err
+}
+
+func (s *Server) CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error {
+	publicKey, err := cryptography.PublicKeyFromString(senderPublicKey)
+	if err != nil {
+		return err
+	}
+
+	sign, err := cryptography.SignatureFromString(signature)
+	bc, err := s.GetBlockchain("BLOCKCHAIN")
+	if err != nil {
+		return err
+	}
+
+	if err = bc.CreateTransaction(senderBlockchainAddress, recipientBlockchainAddress, amount, publicKey, sign); err != nil {
+		return err
+	}
+
+	return nil
 }

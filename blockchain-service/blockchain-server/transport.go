@@ -2,17 +2,17 @@ package blockchain_server
 
 import (
 	"blockchain/blockchain-service/blockchain"
+	http2 "blockchain/foundation/http"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 type Serverer interface {
-	AddTransaction(sender, receiver string, amount float32) (id string, err error)
 	GetBlockchain(address string) (*blockchain.Blockchain, error)
+	GetTransactions() ([]*blockchain.Transaction, error)
+	CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
 }
 
 type Transporter struct {
@@ -48,45 +48,55 @@ func (t *Transporter) HandleGetChain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/transactions" || r.Method != http.MethodPost {
-		http.Error(w, "404 not found.", http.StatusMethodNotAllowed)
-		return
+	switch r.Method {
+	case http.MethodGet:
+		t.getTransaction(w, r)
+	case http.MethodPost:
+		t.createTransaction(w, r)
+	default:
+		http.Error(w, "page not found", http.StatusBadRequest)
 	}
 
-	var reqBody map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+	return
+}
+
+func (t Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
+	ts, err := t.server.GetTransactions()
+	if err != nil {
+		io.WriteString(w, "fail")
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	b, err := json.Marshal(struct {
+		Transactions []*blockchain.Transaction `json:"transactions"`
+		Lenght       int                       `json:"lenght"`
+	}{
+		Transactions: ts,
+		Lenght:       len(ts),
+	})
+	io.WriteString(w, string(b[:]))
+}
+
+func (t Transporter) createTransaction(w http.ResponseWriter, r *http.Request) {
+	var trReq blockchain.TransactionRequest
+	if err := json.NewDecoder(r.Body).Decode(&trReq); err != nil {
 		http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
 		return
 	}
 
-	sender := r.URL.Query().Get("sender")
-	recipient := r.URL.Query().Get("recipient")
-	am := r.URL.Query().Get("amount")
-	amount, err := strconv.ParseFloat(am, 32)
-	if err != nil {
-		http.Error(w, "blockchain-server error - failed to parse amount", http.StatusBadRequest)
+	if !trReq.Validate() {
+		io.WriteString(w, string(http2.JsonStatus("fail")))
+		http.Error(w, "bad request body", http.StatusBadRequest)
 		return
 	}
 
-	id, err := t.server.AddTransaction(sender, recipient, float32(amount))
+	err := t.server.CreateTransaction(*trReq.SenderPublicKey, *trReq.SenderBlockchainAddress, *trReq.RecipientBlockchainAddress, *trReq.Signature, *trReq.Value)
 	if err != nil {
+		io.WriteString(w, "failed")
 		http.Error(w, "blockchain-server error - failed to create short url", http.StatusInternalServerError)
 		return
 	}
 
-	responseBody := blockchain.TransactionResponse{
-		ID: id,
-	}
-
-	b, err := json.Marshal(responseBody)
-	if err != nil {
-		http.Error(w, "blockchain-server error - something went wrong", 500)
-		return
-	}
-
-	if _, err := w.Write(b); err != nil {
-		fmt.Printf("failed to martshal response - %v\n", err)
-	}
-
-	return
+	w.Header().Add("Content-Type", "application/json")
+	io.WriteString(w, "success")
 }
