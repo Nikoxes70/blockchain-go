@@ -1,12 +1,15 @@
 package blockchain_server
 
 import (
-	"blockchain/blockchain-service/blockchain"
-	http2 "blockchain/foundation/http"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+
+	http2 "blockchain/foundation/http"
+
+	"blockchain/blockchain-service/blockchain"
 )
 
 type Serverer interface {
@@ -56,12 +59,33 @@ func (t *Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request)
 	default:
 		http.Error(w, "page not found", http.StatusBadRequest)
 	}
-
-	return
 }
 
 func (t *Transporter) HandleMining(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		bc, err := t.server.GetBlockchain("BLOCKCHAIN")
+		if err != nil {
+			io.WriteString(w, "fail")
+			http.Error(w, "blockchain not found", http.StatusNotFound)
+		}
+		timestamp, err := bc.Mine()
+		if err != nil {
+			io.WriteString(w, "fail")
+			http.Error(w, "mining failed", http.StatusInternalServerError)
+		}
+		io.WriteString(w, "success")
+		http2.JsonStatus(fmt.Sprintf("teimestamp: %v", timestamp))
 
+		b, err := json.Marshal(struct {
+			Timestamp int64 `json:"timestamp"`
+		}{
+			timestamp,
+		})
+		io.WriteString(w, string(b[:]))
+	default:
+		http.Error(w, "page not found", http.StatusBadRequest)
+	}
 }
 
 func (t *Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {

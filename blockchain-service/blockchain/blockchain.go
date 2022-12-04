@@ -1,12 +1,14 @@
 package blockchain
 
 import (
-	"blockchain/foundation/cryptography"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
+
+	"blockchain/foundation/cryptography"
 )
 
 const (
@@ -20,6 +22,7 @@ type Blockchain struct {
 	chain             []*Block
 	blockchainAddress string
 	port              uint16
+	mux               sync.Mutex
 }
 
 func NewBlockchain(blockchainAddress string, port uint16) (*Blockchain, error) {
@@ -70,6 +73,13 @@ func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pK
 }
 
 func (bc *Blockchain) Mine() (int64, error) {
+	bc.mux.Lock()
+	defer bc.mux.Unlock()
+
+	if len(bc.transactionPool) == 0 {
+		return 0, nil
+	}
+
 	err := bc.AddTransaction(BENEFACTOR_ADDRESS, bc.blockchainAddress, MINING_REWARD, nil, nil)
 	if err != nil {
 		return 0, err

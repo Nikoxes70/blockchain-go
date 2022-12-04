@@ -5,12 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d57152b6-7291-4c74-90c6-85577e8d0cb2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/blockchain-service/autominer/miner.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
@@ -24,34 +36,44 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/niko/blockchain-go/blockchain-service/wallet-server&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/niko/blockchain-go/blockchain-service/wallet-server",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/blockchain-service/wallet-server" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.blockchain-server">
+  <component name="RunManager" selected="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd">
     <configuration name="blockchain-server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blockchain-go" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="DIRECTORY" />
       <package value="blockchain/blockchain-service/blockchain-server/cmd" />
       <directory value="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd" />
+      <filePath value="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build blockchain/blockchain-service/blockchain-server/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="blockchain-go" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="blockchain/blockchain-service/blockchain-server/cmd" />
+      <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" />
       <method v="2" />
     </configuration>
@@ -89,6 +111,7 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd" />
       <item itemvalue="Go Build.blockchain-server" />
       <item itemvalue="Go Build.wallet-server" />
       <item itemvalue="Go Test.Test_Blockchain in blockchain/blockchain-service/blockchain" />
@@ -96,6 +119,7 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd" />
         <item itemvalue="Go Build.blockchain-server" />
         <item itemvalue="Go Build.wallet-server" />
         <item itemvalue="Go Test.Test_Wallet in blockchain/blockchain-service/wallet" />
@@ -128,11 +152,6 @@
           <url>file://$PROJECT_DIR$/blockchain-service/wallet/wallet_test.go</url>
           <line>18</line>
           <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go</url>
-          <line>72</line>
-          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
