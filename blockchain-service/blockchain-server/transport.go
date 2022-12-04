@@ -47,7 +47,7 @@ func (t *Transporter) HandleGetChain(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request) {
+func (t *Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		t.getTransaction(w, r)
@@ -60,7 +60,11 @@ func (t Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request) 
 	return
 }
 
-func (t Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
+func (t *Transporter) HandleMining(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (t *Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
 	ts, err := t.server.GetTransactions()
 	if err != nil {
 		io.WriteString(w, "fail")
@@ -77,7 +81,7 @@ func (t Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(b[:]))
 }
 
-func (t Transporter) createTransaction(w http.ResponseWriter, r *http.Request) {
+func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) {
 	var trReq blockchain.TransactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&trReq); err != nil {
 		http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
