@@ -46,6 +46,38 @@ func (s *Server) Index() (*template.Template, error) {
 	return template.ParseFiles(path.Join(temoDir, indexFile))
 }
 
+func (s *Server) Balance(bcAddress string) ([]byte, error) {
+	url := s.gateway + "/balance"
+	client := http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	q := req.URL.Query()
+	q.Add("bc_address", bcAddress)
+	req.URL.RawQuery = q.Encode()
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+	if err != nil || resp.StatusCode > 400 {
+		return nil, fmt.Errorf("failed to POST url - %v, err: %s", url, err)
+	}
+	decoder := json.NewDecoder(resp.Body)
+	var balanceResponse struct {
+		Balance float32 `json:"balance"`
+	}
+
+	if err = decoder.Decode(&balanceResponse); err != nil {
+		return nil, fmt.Errorf("failed to parse response - %v, to struct: %v", resp.Body, balanceResponse)
+	}
+
+	b, err := json.Marshal(balanceResponse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal balance - %v, with err: %s", balanceResponse, err)
+	}
+
+	return b, nil
+}
+
 func (s *Server) Wallet() ([]byte, error) {
 	w, err := wallet.NewWallet(cryptography.GenerateBlockchainAddress)
 	if err != nil {
@@ -89,7 +121,7 @@ func (s *Server) CreateTransaction(senderPublicKey, senderPrivateKey, senderBloc
 		Value:                      &value32,
 		Signature:                  &sString,
 	}
-	//btr.Print()
+
 	b, err := json.Marshal(btr)
 	if err != nil {
 		return nil, err

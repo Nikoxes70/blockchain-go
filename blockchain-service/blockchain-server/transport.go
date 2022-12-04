@@ -2,7 +2,6 @@ package blockchain_server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -32,13 +31,13 @@ func NewTransport(s Serverer) *Transporter {
 func (t *Transporter) HandleGetChain(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		w.Header().Add("Content-Type", "application/json")
 		address := r.URL.Query().Get("adds")
 		bc, err := t.server.GetBlockchain(address)
 		if err != nil {
 			http.Error(w, "404 not found.", http.StatusMethodNotAllowed)
 			return
 		}
+
 		w.Header().Add("Content-Type", "application/json")
 		m, err := bc.MarshalJSON()
 		if err != nil {
@@ -76,12 +75,12 @@ func (t *Transporter) HandleBalance(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "something went wrong", http.StatusInternalServerError)
 		}
 
+		w.Header().Add("Content-Type", "application/json")
 		b, err := json.Marshal(struct {
 			Balance float32 `json:"balance"`
 		}{
 			Balance: balance,
 		})
-		io.WriteString(w, "success")
 		io.WriteString(w, string(b[:]))
 	case http.MethodPost:
 		t.createTransaction(w, r)
@@ -103,9 +102,8 @@ func (t *Transporter) HandleMining(w http.ResponseWriter, r *http.Request) {
 			io.WriteString(w, "fail")
 			http.Error(w, "mining failed", http.StatusInternalServerError)
 		}
-		io.WriteString(w, "success")
-		http2.JsonStatus(fmt.Sprintf("teimestamp: %v", timestamp))
 
+		w.Header().Add("Content-Type", "application/json")
 		b, err := json.Marshal(struct {
 			Timestamp int64 `json:"timestamp"`
 		}{
@@ -154,6 +152,5 @@ func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
 	io.WriteString(w, "success")
 }

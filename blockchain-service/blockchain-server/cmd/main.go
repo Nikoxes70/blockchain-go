@@ -31,13 +31,14 @@ func main() {
 	//am := autominer.New(time.Minute*time.Duration(*i), bc)
 	am := autominer.New(time.Second*10, bc)
 	ctx := context.Background()
-	am.Start(ctx)
+	go am.Start(ctx)
 
 	transport := blockchain_server.NewTransport(managingSrv)
 
 	http.HandleFunc("/chains", transport.HandleGetChain)
 	http.HandleFunc("/transactions", transport.HandleTransactions)
 	http.HandleFunc("/mining", transport.HandleMining)
+	http.HandleFunc("/balance", transport.HandleBalance)
 
 	if err := http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(*p)), nil); err != nil {
 		log.Fatalf("Failed ListenAndServe with err: %s", err)

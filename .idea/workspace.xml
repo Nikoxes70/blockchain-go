@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="d57152b6-7291-4c74-90c6-85577e8d0cb2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/server.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/transport.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/transport.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,7 +58,7 @@
       <recent name="$PROJECT_DIR$/blockchain-service/wallet-server" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd">
+  <component name="RunManager" selected="Go Build.wallet-server">
     <configuration name="blockchain-server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blockchain-go" />
       <working_directory value="$PROJECT_DIR$" />
@@ -67,7 +68,7 @@
       <filePath value="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" />
       <method v="2" />
     </configuration>
-    <configuration name="go build blockchain/blockchain-service/blockchain-server/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+    <configuration name="blockchain-server" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
       <module name="blockchain-go" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
@@ -110,7 +111,6 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd" />
       <item itemvalue="Go Build.blockchain-server" />
       <item itemvalue="Go Build.wallet-server" />
       <item itemvalue="Go Test.Test_Blockchain in blockchain/blockchain-service/blockchain" />
@@ -118,9 +118,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build blockchain/blockchain-service/blockchain-server/cmd" />
-        <item itemvalue="Go Build.blockchain-server" />
         <item itemvalue="Go Build.wallet-server" />
+        <item itemvalue="Go Build.blockchain-server" />
+        <item itemvalue="Go Build.blockchain-server" />
         <item itemvalue="Go Test.Test_Wallet in blockchain/blockchain-service/wallet" />
         <item itemvalue="Go Test.Test_Blockchain in blockchain/blockchain-service/blockchain" />
       </list>
@@ -151,6 +151,16 @@
           <url>file://$PROJECT_DIR$/blockchain-service/wallet/wallet_test.go</url>
           <line>18</line>
           <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go</url>
+          <line>65</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/blockchain-service/wallet-server/server.go</url>
+          <line>63</line>
+          <option name="timeStamp" value="46" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
