@@ -23,6 +23,7 @@ func main() {
 
 	http.HandleFunc("/", transport.HandleIndex)
 	http.HandleFunc("/wallet", transport.HandleWallet)
+	http.HandleFunc("/wallet/balance", transport.HandleWallet)
 	http.HandleFunc("/transactions", transport.HandleTransaction)
 
 	if err := http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(*p)), nil); err != nil {

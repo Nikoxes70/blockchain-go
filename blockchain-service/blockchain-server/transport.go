@@ -16,6 +16,7 @@ type Serverer interface {
 	GetBlockchain(address string) (*blockchain.Blockchain, error)
 	GetTransactions() ([]*blockchain.Transaction, error)
 	CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
+	CalculateBalance(address string) (float32, error)
 }
 
 type Transporter struct {
@@ -54,6 +55,34 @@ func (t *Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request)
 	switch r.Method {
 	case http.MethodGet:
 		t.getTransaction(w, r)
+	case http.MethodPost:
+		t.createTransaction(w, r)
+	default:
+		http.Error(w, "page not found", http.StatusBadRequest)
+	}
+}
+
+func (t *Transporter) HandleBalance(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		bcAddress := r.URL.Query().Get("bc_address")
+		if bcAddress == "" {
+			io.WriteString(w, "fail")
+			http.Error(w, "missing blockchain address", http.StatusBadRequest)
+		}
+		balance, err := t.server.CalculateBalance(bcAddress)
+		if err != nil {
+			io.WriteString(w, "fail")
+			http.Error(w, "something went wrong", http.StatusInternalServerError)
+		}
+
+		b, err := json.Marshal(struct {
+			Balance float32 `json:"balance"`
+		}{
+			Balance: balance,
+		})
+		io.WriteString(w, "success")
+		io.WriteString(w, string(b[:]))
 	case http.MethodPost:
 		t.createTransaction(w, r)
 	default:

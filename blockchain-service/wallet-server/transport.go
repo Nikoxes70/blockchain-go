@@ -71,6 +71,22 @@ func (t *Transporter) HandleWallet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (t *Transporter) HandleBalance(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		t.server.Wallet()
+		b, err := t.server.Wallet()
+		if err != nil {
+			http.Error(w, "server error - page not found", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Add("Content-Type", "application/json")
+		io.WriteString(w, string(b[:]))
+	default:
+		http.Error(w, "page not found", http.StatusBadRequest)
+	}
+}
+
 func (t *Transporter) HandleTransaction(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:

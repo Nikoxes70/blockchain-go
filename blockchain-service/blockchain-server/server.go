@@ -39,6 +39,14 @@ func (s *Server) GetBlockchain(address string) (*blockchain.Blockchain, error) {
 	return bc, nil
 }
 
+func (s *Server) CalculateBalance(address string) (float32, error) {
+	bc, err := s.GetBlockchain("BLOCKCHAIN")
+	if err != nil {
+		return 0, err
+	}
+	return bc.CalculateBalance(address), nil
+}
+
 func (s *Server) GetTransactions() ([]*blockchain.Transaction, error) {
 	bc, err := s.GetBlockchain("BLOCKCHAIN")
 	if err != nil {
