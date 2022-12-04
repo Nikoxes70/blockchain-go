@@ -26,7 +26,7 @@ func (tr *TransactionRequest) Validate() bool {
 type Serverer interface {
 	Index() (*template.Template, error)
 	Wallet() ([]byte, error)
-	CreateTransaction(senderPublicKey, senderPrivateKey, senderBlockchainAddress, recipientBlockchainAddress, v string) ([]byte, error)
+	CreateTransaction(senderPublicKey, senderPrivateKey, senderBlockchainAddress, recipientBlockchainAddress, v *string) ([]byte, error)
 }
 
 type Transporter struct {
@@ -73,9 +73,10 @@ func (t *Transporter) HandleWallet(w http.ResponseWriter, r *http.Request) {
 
 func (t *Transporter) HandleTransaction(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+	case http.MethodGet:
+		http.Error(w, "WTF", http.StatusBadRequest)
 	case http.MethodPost:
 		t.createTransaction(w, r)
-
 	default:
 		http.Error(w, "page not found", http.StatusBadRequest)
 	}
@@ -98,7 +99,7 @@ func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	_, err = t.server.CreateTransaction(*tr.SenderPrivateKey, *tr.SenderPublicKey, *tr.SenderBlockchainAddress, *tr.RecipientBlockchainAddress, *tr.Value)
+	_, err = t.server.CreateTransaction(tr.SenderPublicKey, tr.SenderPrivateKey, tr.SenderBlockchainAddress, tr.RecipientBlockchainAddress, tr.Value)
 	if err != nil {
 		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "failed to read request body", http.StatusBadRequest)

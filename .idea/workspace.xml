@@ -7,11 +7,8 @@
     <list default="true" id="d57152b6-7291-4c74-90c6-85577e8d0cb2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/transport.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/transport.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/wallet/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/wallet/wallet.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet/wallet.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/foundation/cryptography/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/foundation/cryptography/util.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,22 +28,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.format.on.save.advertiser.fired": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/Users/niko/blockchain-go/blockchain-service/wallet-server",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.watchers.conflict.with.on.save.actions.check.performed&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/niko/blockchain-go/blockchain-service/wallet-server&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/blockchain-service/wallet-server" />

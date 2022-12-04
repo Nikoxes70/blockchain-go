@@ -47,6 +47,15 @@ type TransactionRequest struct {
 	Signature                  *string  `json:"signature"`
 }
 
+func (t *TransactionRequest) Print() {
+	fmt.Printf("%s\n", strings.Repeat("-", 40))
+	fmt.Printf(" sender_blockchain_address      %s\n", *t.SenderBlockchainAddress)
+	fmt.Printf(" recipient_blockchain_address   %s\n", *t.RecipientBlockchainAddress)
+	fmt.Printf(" sender_public_key              %s\n", *t.SenderPublicKey)
+	fmt.Printf(" value                          %.1f\n", *t.Value)
+	fmt.Printf(" signature                      %s\n", *t.Signature)
+}
+
 func (tr *TransactionRequest) Validate() bool {
 	return tr.RecipientBlockchainAddress != nil &&
 		tr.SenderBlockchainAddress != nil &&

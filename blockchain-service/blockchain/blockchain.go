@@ -60,9 +60,9 @@ func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pK
 		if !valid {
 			return fmt.Errorf("invalid transaction signature")
 		}
-		if bc.CalculateBalance(sender) < value {
-			return fmt.Errorf("not enouth funds")
-		}
+		//if bc.CalculateBalance(sender) < value {
+		//	return fmt.Errorf("not enouth funds")
+		//}
 	}
 
 	bc.transactionPool = append(bc.transactionPool, t)

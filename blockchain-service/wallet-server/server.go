@@ -58,24 +58,24 @@ func (s *Server) Wallet() ([]byte, error) {
 	return b, nil
 }
 
-func (s *Server) CreateTransaction(senderPublicKey, senderPrivateKey, senderBlockchainAddress, recipientBlockchainAddress, v string) ([]byte, error) {
-	publicKey, err := cryptography.PublicKeyFromString(senderPublicKey)
+func (s *Server) CreateTransaction(senderPublicKey, senderPrivateKey, senderBlockchainAddress, recipientBlockchainAddress, v *string) ([]byte, error) {
+	publicKey, err := cryptography.PublicKeyFromString(*senderPublicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	privateKey, err := cryptography.PrivateKeyFromString(senderPrivateKey, publicKey)
+	privateKey, err := cryptography.PrivateKeyFromString(*senderPrivateKey, publicKey)
 	if err != nil {
 		return nil, err
 	}
 
-	value, err := strconv.ParseFloat(v, 32)
+	value, err := strconv.ParseFloat(*v, 32)
 	if err != nil {
 		return nil, err
 	}
 	value32 := float32(value)
 
-	walletTransaction := wallet.NewTransaction(privateKey, publicKey, senderBlockchainAddress, recipientBlockchainAddress, float32(value))
+	walletTransaction := wallet.NewTransaction(privateKey, publicKey, *senderBlockchainAddress, *recipientBlockchainAddress, float32(value))
 	sign, err := walletTransaction.GenerateSignature()
 	if err != nil {
 		return nil, err
@@ -83,12 +83,13 @@ func (s *Server) CreateTransaction(senderPublicKey, senderPrivateKey, senderBloc
 	sString := sign.String()
 
 	btr := blockchain.TransactionRequest{
-		SenderBlockchainAddress:    &senderBlockchainAddress,
-		RecipientBlockchainAddress: &recipientBlockchainAddress,
-		SenderPublicKey:            &senderPublicKey,
+		SenderBlockchainAddress:    senderBlockchainAddress,
+		RecipientBlockchainAddress: recipientBlockchainAddress,
+		SenderPublicKey:            senderPublicKey,
 		Value:                      &value32,
 		Signature:                  &sString,
 	}
+	//btr.Print()
 	b, err := json.Marshal(btr)
 	if err != nil {
 		return nil, err
