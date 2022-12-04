@@ -21,8 +21,8 @@ func (s *Signature) String() string {
 	return fmt.Sprintf("%064x%064x", s.R, s.S)
 }
 
-func GenerateBlockchainAddress(pKey ecdsa.PrivateKey) string {
-	// Perform SHA-256 hashing on the public key (32 bytes).
+func GenerateBlockchainAddress(pKey *ecdsa.PublicKey) string {
+	//Perform SHA-256 hashing on the public key (32 bytes).
 	h2 := sha256.New()
 	h2.Write(pKey.X.Bytes())
 	h2.Write(pKey.Y.Bytes())
@@ -100,6 +100,6 @@ func PrivateKeyFromString(s string, pubKey *ecdsa.PublicKey) (*ecdsa.PrivateKey,
 	bi.SetBytes(b)
 	return &ecdsa.PrivateKey{
 		PublicKey: *pubKey,
-		D:         nil,
+		D:         &bi,
 	}, nil
 }

@@ -44,9 +44,9 @@ func (bc *Blockchain) TransactonPool() []*Transaction {
 }
 
 func (bc *Blockchain) CreateTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
-	bc.AddTransaction(sender, recipient, value, pKey, s)
+	err := bc.AddTransaction(sender, recipient, value, pKey, s)
 	//Sync
-	return nil
+	return err
 }
 
 func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
@@ -147,7 +147,7 @@ func (bc *Blockchain) verifyTransactionSignature(sender *ecdsa.PublicKey, sign *
 	if err != nil {
 		return false, err
 	}
-	h := sha256.Sum256([]byte(b))
+	h := sha256.Sum256(b)
 	return ecdsa.Verify(sender, h[:], sign.R, sign.S), nil
 }
 

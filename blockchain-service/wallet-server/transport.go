@@ -98,7 +98,7 @@ func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	_, err = t.server.CreateTransaction(*tr.SenderPublicKey, *tr.SenderPrivateKey, *tr.SenderBlockchainAddress, *tr.RecipientBlockchainAddress, *tr.Value)
+	_, err = t.server.CreateTransaction(*tr.SenderPrivateKey, *tr.SenderPublicKey, *tr.SenderBlockchainAddress, *tr.RecipientBlockchainAddress, *tr.Value)
 	if err != nil {
 		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "failed to read request body", http.StatusBadRequest)

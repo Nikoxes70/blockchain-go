@@ -14,13 +14,13 @@ type Wallet struct {
 	blockchainAddress string
 }
 
-func NewWallet(generateAddress func(pKey ecdsa.PrivateKey) string) (*Wallet, error) {
+func NewWallet(generateAddress func(pKey *ecdsa.PublicKey) string) (*Wallet, error) {
 	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, err
 	}
 
-	address := generateAddress(*privateKey)
+	address := generateAddress(&privateKey.PublicKey)
 
 	return &Wallet{
 		privateKey:        privateKey,

@@ -11,10 +11,10 @@ var cache map[string]*blockchain.Blockchain = make(map[string]*blockchain.Blockc
 
 type Server struct {
 	port            uint16
-	generateAddress func(pKey ecdsa.PrivateKey) string
+	generateAddress func(pKey *ecdsa.PublicKey) string
 }
 
-func New(port uint16, generateAddressFunc func(pKey ecdsa.PrivateKey) string) *Server {
+func New(port uint16, generateAddressFunc func(pKey *ecdsa.PublicKey) string) *Server {
 	return &Server{
 		port:            port,
 		generateAddress: generateAddressFunc,

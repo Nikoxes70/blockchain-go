@@ -32,7 +32,7 @@ func (t *Transaction) GenerateSignature() (*cryptography.Signature, error) {
 	if err != nil {
 		return nil, err
 	}
-	h := sha256.Sum256([]byte(b))
+	h := sha256.Sum256(b)
 	r, s, err := ecdsa.Sign(rand.Reader, t.senderPrivateKey, h[:])
 	return &cryptography.Signature{
 		R: r,
