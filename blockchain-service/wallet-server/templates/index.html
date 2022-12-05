@@ -43,10 +43,6 @@
                      data: JSON.stringify(transaction_data),
                      success: function (response) {
                          console.info(response);
-                         if ($.parseJSON(response).message === 'fail') {
-                             alert('Send failed');
-                             return;
-                         }
                          alert('Send success');
                      },
                      error: function (response) {
@@ -57,15 +53,15 @@
              })
 
              function reload_amount() {
-                 let data = {'blockchain_address': $('#blockchain_address').val()}
+                 let data = {'bc_address': $('#blockchain_address').val()}
                  $.ajax({
-                     url: '/wallet/amount',
+                     url: '/wallet/balance',
                      type: 'GET',
                      data: data,
                      success: function (response) {
-                         let amount = response['amount'];
-                         $('#wallet_amount').text(amount);
-                         console.info(amount)
+                         let balance = response['balance'];
+                         $('#wallet_amount').text(balance);
+                         console.info(balance)
                      },
                      error: function(error) {
                          console.error(error)
