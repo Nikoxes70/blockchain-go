@@ -5,20 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d57152b6-7291-4c74-90c6-85577e8d0cb2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/blockchain-service/neighbor-nodes-syncer/syncer.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/foundation/cryptography/crypto_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/foundation/network/neighbors.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/foundation/network/neighbors_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/autominer/miner.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/autominer/miner.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/cmd/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/server.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain-server/transport.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/blockchain/blockchain_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet-server/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockchain-service/wallet/wallet.go" beforeDir="false" afterPath="$PROJECT_DIR$/blockchain-service/wallet/wallet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/foundation/cryptography/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/foundation/cryptography/crypto.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/foundation/network/neighbors.go" beforeDir="false" afterPath="$PROJECT_DIR$/foundation/network/ipfs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/foundation/network/neighbors_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/foundation/network/ipfs_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
