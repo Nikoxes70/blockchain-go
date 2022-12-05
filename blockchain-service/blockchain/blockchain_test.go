@@ -23,7 +23,7 @@ func Test_Blockchain(t *testing.T) {
 		t.Errorf("Failed to instatiate a wallet with err: %s", err)
 	}
 
-	bc, err := NewBlockchain(miner.BlockchainAddress(), 0)
+	bc, err := NewBlockchain(miner.BlockchainAddress())
 	if err != nil {
 		t.Errorf("Failed to instatiate a blockchain with err: %s", err)
 	}
@@ -39,9 +39,12 @@ func Test_Blockchain(t *testing.T) {
 		t.Errorf("Failed to CreateTransaction with err: %s", err)
 	}
 
-	block, err := bc.Mine()
+	block, mined, err := bc.Mine()
 	if err != nil {
 		t.Errorf("Failed to Mine with err: %s", err)
+	}
+	if !mined {
+		t.Errorf("BLOCK NOT MINED")
 	}
 	fmt.Println(block)
 

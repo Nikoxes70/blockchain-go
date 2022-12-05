@@ -10,6 +10,7 @@ import (
 
 	"blockchain/blockchain-service/autominer"
 	"blockchain/blockchain-service/blockchain-server"
+	syncer "blockchain/blockchain-service/neighbor-nodes-syncer"
 	"blockchain/foundation/cryptography"
 )
 
@@ -19,19 +20,19 @@ func init() {
 
 func main() {
 	p := flag.Uint("port", 5000, "TCP Port Number for Blockchain server")
-	//i := flag.Int("automineInterval", 10, "Automine interval in minutes")
+	//ami := flag.Int("automineInterval", 10, "Automine interval in minutes")
+	//nsi := flag.Int("neighborNodeSyncInterval", 10, "Neighbor node sync interval in seconds")
 	flag.Parse()
-
+	print(p)
 	managingSrv := blockchain_server.New(uint16(*p), cryptography.GenerateBlockchainAddress)
-	bc, err := managingSrv.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		log.Fatalf("Failed to GetBlockchain with err: %s", err)
-	}
 
 	//am := autominer.New(time.Minute*time.Duration(*i), bc)
-	am := autominer.New(time.Second*10, bc)
+	am := autominer.New(time.Second*10, managingSrv)
 	ctx := context.Background()
 	go am.Start(ctx)
+
+	ns := syncer.New(time.Second*10, managingSrv)
+	go ns.Start(ctx)
 
 	transport := blockchain_server.NewTransport(managingSrv)
 

@@ -21,15 +21,13 @@ type Blockchain struct {
 	transactionPool   []*Transaction
 	chain             []*Block
 	blockchainAddress string
-	port              uint16
 	mux               sync.Mutex
 }
 
-func NewBlockchain(blockchainAddress string, port uint16) (*Blockchain, error) {
+func NewBlockchain(blockchainAddress string) (*Blockchain, error) {
 	b := &Block{}
 	bc := &Blockchain{
 		blockchainAddress: blockchainAddress,
-		port:              port,
 	}
 
 	hash, err := b.Hash()
@@ -46,10 +44,14 @@ func (bc *Blockchain) TransactonPool() []*Transaction {
 	return bc.transactionPool
 }
 
+func (bc *Blockchain) TruncateTransactonPool() int {
+	l := len(bc.transactionPool)
+	bc.transactionPool = []*Transaction{}
+	return l
+}
+
 func (bc *Blockchain) CreateTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
-	err := bc.AddTransaction(sender, recipient, value, pKey, s)
-	//Sync
-	return err
+	return bc.AddTransaction(sender, recipient, value, pKey, s)
 }
 
 func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error {
@@ -72,30 +74,30 @@ func (bc *Blockchain) AddTransaction(sender, recipient string, value float32, pK
 	return nil
 }
 
-func (bc *Blockchain) Mine() (int64, error) {
+func (bc *Blockchain) Mine() (int64, bool, error) {
 	bc.mux.Lock()
 	defer bc.mux.Unlock()
 
 	if len(bc.transactionPool) == 0 {
-		return 0, nil
+		return 0, false, nil
 	}
 
 	err := bc.AddTransaction(BENEFACTOR_ADDRESS, bc.blockchainAddress, MINING_REWARD, nil, nil)
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 
 	nonce, err := bc.proofOfWork()
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 
 	prevHash, err := bc.lastBlock().Hash()
 	if err != nil {
-		return 0, err
+		return 0, false, err
 	}
 	b := bc.createBlock(nonce, prevHash)
-	return b.Timestamp, nil
+	return b.Timestamp, true, nil
 }
 
 func (bc *Blockchain) CalculateBalance(address string) float32 {

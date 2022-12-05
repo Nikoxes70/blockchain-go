@@ -14,7 +14,7 @@ func init() {
 }
 
 func main() {
-	p := flag.Uint("port", 5001, "TCP Port Number for wallet server")
+	p := flag.Uint("port", 4999, "TCP Port Number for wallet server")
 	gateway := flag.String("gateway", "http://127.0.0.1:5000", "Blockchain Gateway")
 	flag.Parse()
 

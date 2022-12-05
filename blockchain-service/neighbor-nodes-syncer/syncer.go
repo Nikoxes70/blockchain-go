@@ -1,4 +1,4 @@
-package autominer
+package neighbor_nodes_syncer
 
 import (
 	"context"
@@ -7,22 +7,22 @@ import (
 )
 
 type blockchainer interface {
-	Mine() (int64, bool, error)
+	SyncNeighbors() (int, error)
 }
 
-type miner struct {
+type syncer struct {
 	tickerTime time.Duration
 	blockchainer
 }
 
-func New(d time.Duration, b blockchainer) miner {
-	return miner{
+func New(d time.Duration, b blockchainer) syncer {
+	return syncer{
 		tickerTime:   d,
 		blockchainer: b,
 	}
 }
 
-func (c *miner) Start(ctx context.Context) {
+func (c *syncer) Start(ctx context.Context) {
 	t := time.NewTicker(c.tickerTime)
 	run := true
 	go func(c context.Context) {
@@ -46,13 +46,10 @@ func (c *miner) Start(ctx context.Context) {
 	}
 }
 
-func (c *miner) do() {
-	timestamp, mined, err := c.Mine()
+func (c *syncer) do() {
+	nodesCount, err := c.SyncNeighbors()
 	if err != nil {
-		log.Printf("failed to autoMine with err: %s", err)
-		return
+		log.Printf("failed to sync neighbors nodes with err: %s", err)
 	}
-	if mined {
-		log.Printf("automine sucess block timestamp: %d", timestamp)
-	}
+	log.Printf("success sync neighbors nodes: %d", nodesCount)
 }
