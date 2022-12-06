@@ -43,7 +43,7 @@ func main() {
 
 	transport := blockchain_server.NewTransport(managingSrv)
 
-	http.HandleFunc("/chains", transport.HandleGetChain)
+	http.HandleFunc("/chain", transport.HandleGetChain)
 	http.HandleFunc("/transactions", transport.HandleTransactions)
 	http.HandleFunc("/mining", transport.HandleMining)
 	http.HandleFunc("/balance", transport.HandleBalance)

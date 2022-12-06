@@ -42,7 +42,7 @@ func (t *Transaction) UnmarshalJSON(b []byte) error {
 		Recipient: &t.recipient,
 		Value:     &t.value,
 	}
-	return json.Unmarshal(b, s)
+	return json.Unmarshal(b, &s)
 }
 
 func (t *Transaction) Print() {

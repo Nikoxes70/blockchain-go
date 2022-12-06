@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 
@@ -136,7 +135,7 @@ func (bc *Blockchain) ValidChain(chain []*Block) (bool, error) {
 			return false, err
 		}
 
-		if b.previousHash != hash {
+		if b.GetPreviousHash() != hash {
 			return false, nil
 		}
 
@@ -167,7 +166,7 @@ func (bc *Blockchain) Print() {
 
 func (bc *Blockchain) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Blocks []*Block `json:"chains"`
+		Blocks []*Block `json:"chain"`
 	}{
 		Blocks: bc.chain,
 	})
@@ -175,7 +174,7 @@ func (bc *Blockchain) MarshalJSON() ([]byte, error) {
 
 func (bc *Blockchain) UnmarshalJSON(b []byte) error {
 	s := struct {
-		Blocks *[]*Block `json:"blocks"`
+		Blocks *[]*Block `json:"chain"`
 	}{
 		Blocks: &bc.chain,
 	}

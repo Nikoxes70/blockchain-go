@@ -235,10 +235,16 @@ func (s *Server) ResolveConflicts() (bool, error) {
 			continue
 		}
 
-		if err != nil || resp.StatusCode > 400 {
+		if err != nil {
 			errsStr = append(errsStr, err.Error())
 			continue
 		}
+
+		if resp.StatusCode > 400 {
+			errsStr = append(errsStr, fmt.Sprintf("failed to Get url - %v, err: %v", endpoint, err))
+			continue
+		}
+
 		decoder := json.NewDecoder(resp.Body)
 		var otherBlockchain blockchain.Blockchain
 		err = decoder.Decode(&otherBlockchain)

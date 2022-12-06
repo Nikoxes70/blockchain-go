@@ -62,7 +62,7 @@ func (b *Block) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (b *Block) UnarshalJSON(bts []byte) error {
+func (b *Block) UnmarshalJSON(bts []byte) error {
 	var previousHash string
 	s := struct {
 		Nonce        *int            `json:"nonce"`
