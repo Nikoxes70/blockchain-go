@@ -32,7 +32,7 @@ func (b *Block) GetPreviousHash() [32]byte {
 	return b.previousHash
 }
 
-func (b *Block) GetTNonce() int {
+func (b *Block) GetNonce() int {
 	return b.nonce
 }
 
@@ -48,7 +48,7 @@ func (b *Block) Hash() ([32]byte, error) {
 	return sha256.Sum256(bts), nil
 }
 
-func (b *Block) MarshallJSON() ([]byte, error) {
+func (b *Block) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Nonce        int            `json:"nonce"`
 		PreviousHash string         `json:"previous_hash"`
@@ -62,7 +62,7 @@ func (b *Block) MarshallJSON() ([]byte, error) {
 	})
 }
 
-func (b *Block) UnarshallJSON(bts []byte) error {
+func (b *Block) UnarshalJSON(bts []byte) error {
 	var previousHash string
 	s := struct {
 		Nonce        *int            `json:"nonce"`

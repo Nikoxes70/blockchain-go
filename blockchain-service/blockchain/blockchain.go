@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 
@@ -139,7 +140,7 @@ func (bc *Blockchain) ValidChain(chain []*Block) (bool, error) {
 			return false, nil
 		}
 
-		valid, err := bc.validProof(b.GetTNonce(), b.GetPreviousHash(), b.GetTransactions(), MIN_DIFFICULTY)
+		valid, err := bc.validProof(b.GetNonce(), b.GetPreviousHash(), b.GetTransactions(), MIN_DIFFICULTY)
 		if err != nil {
 			return false, err
 		}
