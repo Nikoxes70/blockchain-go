@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"blockchain/blockchain-service/blockchain"
-	"blockchain/blockchain-service/wallet"
 	"blockchain/foundation/cryptography"
 	"blockchain/foundation/network"
 )
@@ -23,69 +22,86 @@ const (
 	NEIGHBOR_IP_RANGE_END       = 1
 )
 
-var cache map[string]*blockchain.Blockchain = make(map[string]*blockchain.Blockchain)
+type blockchainer interface {
+	SetChain(c []*blockchain.Block)
+	Chain() []*blockchain.Block
+	TransactionPool() []*blockchain.Transaction
+	TruncateTransactionPool() int
+	CreateTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error
+	AddTransaction(sender, recipient string, value float32, pKey *ecdsa.PublicKey, s *cryptography.Signature) error
+	Mine() (int64, bool, error)
+	CalculateBalance(address string) float32
+	ValidChain(chain []*blockchain.Block) (bool, error)
+	Print()
+	MarshalJSON() ([]byte, error)
+}
 
 type Server struct {
 	port uint16
 	mux  sync.Mutex
+	bc   blockchainer
 
 	neighbors       []string
 	muxNeighbors    sync.Mutex
 	generateAddress func(pKey *ecdsa.PublicKey) string
 }
 
-func New(port uint16, generateAddressFunc func(pKey *ecdsa.PublicKey) string) *Server {
+func New(port uint16, bc blockchainer, generateAddressFunc func(pKey *ecdsa.PublicKey) string) *Server {
 	return &Server{
 		port:            port,
+		bc:              bc,
+		muxNeighbors:    sync.Mutex{},
 		generateAddress: generateAddressFunc,
 	}
 }
 
+func (s *Server) GetBlockchainBytes() ([]byte, error) {
+	return s.bc.MarshalJSON()
+}
+
 func (s *Server) Mine() (int64, bool, error) {
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return 0, false, err
-	}
-	t, mined, err := bc.Mine()
+	t, mined, err := s.bc.Mine()
 	if err != nil {
 		return 0, false, err
 	}
 
-	updatedCount, err := s.DeleteNeighborsPools()
-	if err != nil {
-		log.Printf("failed to DeleteNeighborsPools with err: %s", err)
+	if mined {
+		updatedCount, err := s.DeleteNeighborsPools()
+		if err != nil {
+			log.Printf("failed to DeleteNeighborsPools with err: %s", err)
+		}
+		log.Printf("updated %d nneighbors", updatedCount)
+
+		var errsStr []string
+		for _, n := range s.neighbors {
+			endpoint := fmt.Sprintf("http://%s/consensus", n)
+			client := &http.Client{}
+			req, err := http.NewRequest(http.MethodPut, endpoint, nil)
+			if err != nil {
+				errsStr = append(errsStr, err.Error())
+				continue
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				errsStr = append(errsStr, err.Error())
+				continue
+			}
+			if resp.StatusCode > 400 {
+				errsStr = append(errsStr, fmt.Sprintf("Request failed - status: %s, body: %v", resp.Status, resp.Body))
+				continue
+			}
+		}
 	}
-	log.Printf("updated %d nneighbors", updatedCount)
+
 	return t, mined, nil
 }
 
-func (s *Server) GetBlockchain(address string) (*blockchain.Blockchain, error) {
-	bc, ok := cache[address]
-	if !ok {
-		minersWallet, err := wallet.NewWallet(s.generateAddress)
-		if err != nil {
-			return nil, err
-		}
-		bc, err = blockchain.NewBlockchain(minersWallet.BlockchainAddress())
-		cache[address] = bc
-	}
-	return bc, nil
-}
-
 func (s *Server) CalculateBalance(address string) (float32, error) {
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return 0, err
-	}
-	return bc.CalculateBalance(address), nil
+	return s.bc.CalculateBalance(address), nil
 }
 
-func (s *Server) GetTransactions() ([]*blockchain.Transaction, error) {
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return nil, err
-	}
-	return bc.TransactonPool(), err
+func (s *Server) GetTransactions() []*blockchain.Transaction {
+	return s.bc.TransactionPool()
 }
 
 func (s *Server) CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error {
@@ -95,12 +111,8 @@ func (s *Server) CreateTransaction(senderPublicKey, senderBlockchainAddress, rec
 	}
 
 	sign, err := cryptography.SignatureFromString(signature)
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return err
-	}
 
-	if err = bc.CreateTransaction(senderBlockchainAddress, recipientBlockchainAddress, amount, publicKey, sign); err != nil {
+	if err = s.bc.CreateTransaction(senderBlockchainAddress, recipientBlockchainAddress, amount, publicKey, sign); err != nil {
 		return err
 	}
 
@@ -114,12 +126,8 @@ func (s *Server) AddTransaction(senderPublicKey, senderBlockchainAddress, recipi
 	}
 
 	sign, err := cryptography.SignatureFromString(signature)
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return err
-	}
 
-	if err = bc.AddTransaction(senderBlockchainAddress, recipientBlockchainAddress, amount, publicKey, sign); err != nil {
+	if err = s.bc.AddTransaction(senderBlockchainAddress, recipientBlockchainAddress, amount, publicKey, sign); err != nil {
 		return err
 	}
 
@@ -160,12 +168,15 @@ func (s *Server) UpdateNeighbors(senderPublicKey, senderBlockchainAddress, recip
 		log.Printf("%v", resp)
 	}
 
-	return neightborsUpdated, fmt.Errorf(strings.Join(errsStr, "\n"))
+	if errsStr != nil {
+		return neightborsUpdated, fmt.Errorf(strings.Join(errsStr, "\n"))
+	}
+	return neightborsUpdated, nil
 }
 
 func (s *Server) DeleteNeighborsPools() (int, error) {
 	neightborsUpdated := 0
-	errsStr := []string{}
+	var errsStr []string
 	for _, n := range s.neighbors {
 		endpoint := fmt.Sprintf("http://%s/transactions", n)
 		client := &http.Client{}
@@ -186,13 +197,8 @@ func (s *Server) DeleteNeighborsPools() (int, error) {
 	return neightborsUpdated, fmt.Errorf(strings.Join(errsStr, "\n"))
 }
 
-func (s *Server) CleaTransactionPool() (int, error) {
-	bc, err := s.GetBlockchain("BLOCKCHAIN")
-	if err != nil {
-		return 0, err
-	}
-	c := bc.TruncateTransactonPool()
-	return c, err
+func (s *Server) CleaTransactionPool() int {
+	return s.bc.TruncateTransactionPool()
 }
 
 func (s *Server) SetNeighbors() (int, error) {
@@ -215,4 +221,53 @@ func (s *Server) SyncNeighbors() (int, error) {
 	s.muxNeighbors.Lock()
 	defer s.muxNeighbors.Unlock()
 	return s.SetNeighbors()
+}
+
+func (s *Server) ResolveConflicts() (bool, error) {
+	var longestChain []*blockchain.Block
+	maxLenght := len(s.bc.Chain())
+	var errsStr []string
+	for _, n := range s.neighbors {
+		endpoint := fmt.Sprintf("http://%s/chain", n)
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			errsStr = append(errsStr, err.Error())
+			continue
+		}
+
+		if err != nil || resp.StatusCode > 400 {
+			errsStr = append(errsStr, err.Error())
+			continue
+		}
+		decoder := json.NewDecoder(resp.Body)
+		var otherBlockchain blockchain.Blockchain
+		err = decoder.Decode(&otherBlockchain)
+		if err != nil {
+			errsStr = append(errsStr, err.Error())
+			continue
+		}
+		chain := otherBlockchain.Chain()
+		if len(chain) > maxLenght {
+			valid, err := s.bc.ValidChain(chain)
+			if err != nil {
+				errsStr = append(errsStr, err.Error())
+				continue
+			}
+
+			if valid {
+				maxLenght = len(chain)
+				longestChain = chain
+			}
+		}
+	}
+
+	if errsStr != nil {
+		return false, fmt.Errorf(strings.Join(errsStr, "\n"))
+	}
+
+	if longestChain != nil {
+		s.bc.SetChain(longestChain)
+		return true, nil
+	}
+	return false, nil
 }

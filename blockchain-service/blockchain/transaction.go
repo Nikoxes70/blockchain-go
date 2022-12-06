@@ -32,6 +32,19 @@ func (t *Transaction) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (t *Transaction) UnmarshalJSON(b []byte) error {
+	s := struct {
+		Sender    *string  `json:"sender_blockchain_address"`
+		Recipient *string  `json:"recipient_blockchain_address"`
+		Value     *float32 `json:"value"`
+	}{
+		Sender:    &t.sender,
+		Recipient: &t.recipient,
+		Value:     &t.value,
+	}
+	return json.Unmarshal(b, s)
+}
+
 func (t *Transaction) Print() {
 	fmt.Printf("%s\n", strings.Repeat("-", 40))
 	fmt.Printf(" sender_blockchain_address      %s\n", t.sender)

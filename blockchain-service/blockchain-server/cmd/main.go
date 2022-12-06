@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blockchain/blockchain-service/blockchain"
 	"context"
 	"flag"
 	"log"
@@ -22,17 +23,23 @@ func main() {
 	p := flag.Uint("port", 5000, "TCP Port Number for Blockchain server")
 	//ami := flag.Int("automineInterval", 10, "Automine interval in minutes")
 	//nsi := flag.Int("neighborNodeSyncInterval", 10, "Neighbor node sync interval in seconds")
+	bcAddress := flag.String("bcAddress", "0xAF909ba846284732E2a4Ec7bE12574CA937AAdd4", "Blockchain address")
 	flag.Parse()
-	print(p)
-	managingSrv := blockchain_server.New(uint16(*p), cryptography.GenerateBlockchainAddress)
+
+	bc, err := blockchain.NewBlockchain(*bcAddress)
+	if err != nil {
+		log.Fatalf("Failed to instantiate Blockchain with err: %s", err)
+	}
+	managingSrv := blockchain_server.New(uint16(*p), bc, cryptography.GenerateBlockchainAddress)
 
 	//am := autominer.New(time.Minute*time.Duration(*i), bc)
 	am := autominer.New(time.Second*10, managingSrv)
-	ctx := context.Background()
-	go am.Start(ctx)
+	amCtx := context.Background()
+	go am.Start(amCtx)
 
 	ns := syncer.New(time.Second*10, managingSrv)
-	go ns.Start(ctx)
+	nsCtx := context.Background()
+	go ns.Start(nsCtx)
 
 	transport := blockchain_server.NewTransport(managingSrv)
 
@@ -40,6 +47,7 @@ func main() {
 	http.HandleFunc("/transactions", transport.HandleTransactions)
 	http.HandleFunc("/mining", transport.HandleMining)
 	http.HandleFunc("/balance", transport.HandleBalance)
+	http.HandleFunc("/consensus", transport.HandleConsensus)
 
 	if err := http.ListenAndServe("0.0.0.0:"+strconv.Itoa(int(*p)), nil); err != nil {
 		log.Fatalf("Failed ListenAndServe with err: %s", err)

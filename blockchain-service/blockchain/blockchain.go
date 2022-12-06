@@ -40,11 +40,19 @@ func NewBlockchain(blockchainAddress string) (*Blockchain, error) {
 
 // Public
 
-func (bc *Blockchain) TransactonPool() []*Transaction {
+func (bc *Blockchain) SetChain(c []*Block) {
+	bc.chain = c
+}
+
+func (bc *Blockchain) Chain() []*Block {
+	return bc.chain
+}
+
+func (bc *Blockchain) TransactionPool() []*Transaction {
 	return bc.transactionPool
 }
 
-func (bc *Blockchain) TruncateTransactonPool() int {
+func (bc *Blockchain) TruncateTransactionPool() int {
 	l := len(bc.transactionPool)
 	bc.transactionPool = []*Transaction{}
 	return l
@@ -78,7 +86,7 @@ func (bc *Blockchain) Mine() (int64, bool, error) {
 	bc.mux.Lock()
 	defer bc.mux.Unlock()
 
-	if len(bc.transactionPool) == 0 {
+	if len(bc.TransactionPool()) == 0 {
 		return 0, false, nil
 	}
 
@@ -97,13 +105,13 @@ func (bc *Blockchain) Mine() (int64, bool, error) {
 		return 0, false, err
 	}
 	b := bc.createBlock(nonce, prevHash)
-	return b.Timestamp, true, nil
+	return b.timestamp, true, nil
 }
 
 func (bc *Blockchain) CalculateBalance(address string) float32 {
 	var balance float32 = 0
 	for _, b := range bc.chain {
-		for _, t := range b.Transactions {
+		for _, t := range b.GetTransactions() {
 			if t.recipient == address {
 				balance += t.value
 			}
@@ -114,6 +122,37 @@ func (bc *Blockchain) CalculateBalance(address string) float32 {
 		}
 	}
 	return balance
+}
+
+func (bc *Blockchain) ValidChain(chain []*Block) (bool, error) {
+	preBlock := chain[0]
+	currentIndex := 1
+
+	for currentIndex < len(chain) {
+		b := chain[currentIndex]
+		hash, err := preBlock.Hash()
+		if err != nil {
+			return false, err
+		}
+
+		if b.previousHash != hash {
+			return false, nil
+		}
+
+		valid, err := bc.validProof(b.GetTNonce(), b.GetPreviousHash(), b.GetTransactions(), MIN_DIFFICULTY)
+		if err != nil {
+			return false, err
+		}
+
+		if !valid {
+			return false, nil
+		}
+
+		preBlock = b
+		currentIndex++
+	}
+
+	return true, nil
 }
 
 func (bc *Blockchain) Print() {
@@ -133,10 +172,19 @@ func (bc *Blockchain) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (bc *Blockchain) UnmarshalJSON(b []byte) error {
+	s := struct {
+		Blocks *[]*Block `json:"blocks"`
+	}{
+		Blocks: &bc.chain,
+	}
+	return json.Unmarshal(b, &s)
+}
+
 // Private
 
 func (bc *Blockchain) createBlock(nonce int, previousHash [32]byte) *Block {
-	b := NewBlock(nonce, previousHash, bc.transactionPool)
+	b := NewBlock(nonce, previousHash, bc.TransactionPool())
 	bc.chain = append(bc.chain, b)
 	bc.transactionPool = []*Transaction{}
 	return b
@@ -147,8 +195,8 @@ func (bc *Blockchain) lastBlock() *Block {
 }
 
 func (bc *Blockchain) copyTransactionPool() []*Transaction {
-	transactions := make([]*Transaction, len(bc.transactionPool))
-	for i, t := range bc.transactionPool {
+	transactions := make([]*Transaction, len(bc.TransactionPool()))
+	for i, t := range bc.TransactionPool() {
 		transactions[i] = NewTransaction(t.sender, t.recipient, t.value)
 	}
 	return transactions
@@ -166,10 +214,10 @@ func (bc *Blockchain) verifyTransactionSignature(sender *ecdsa.PublicKey, sign *
 func (bc *Blockchain) validProof(nonce int, prevHash [32]byte, trs []*Transaction, difficulty int) (bool, error) {
 	zeros := strings.Repeat("0", difficulty)
 	guessBlock := Block{
-		Nonce:        nonce,
-		PreviousHash: prevHash,
-		Timestamp:    0,
-		Transactions: trs,
+		nonce:        nonce,
+		previousHash: prevHash,
+		timestamp:    0,
+		transactions: trs,
 	}
 	hash, err := guessBlock.Hash()
 	if err != nil {

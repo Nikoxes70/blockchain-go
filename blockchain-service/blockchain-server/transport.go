@@ -12,12 +12,14 @@ import (
 )
 
 type Serverer interface {
-	GetBlockchain(address string) (*blockchain.Blockchain, error)
-	GetTransactions() ([]*blockchain.Transaction, error)
+	GetTransactions() []*blockchain.Transaction
 	CalculateBalance(address string) (float32, error)
 	CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
 	AddTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
-	CleaTransactionPool() (int, error)
+	CleaTransactionPool() int
+	Mine() (int64, bool, error)
+	ResolveConflicts() (bool, error)
+	GetBlockchainBytes() ([]byte, error)
 }
 
 type Transporter struct {
@@ -31,22 +33,18 @@ func NewTransport(s Serverer) *Transporter {
 }
 
 func (t *Transporter) HandleGetChain(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodGet:
-		address := r.URL.Query().Get("adds")
-		bc, err := t.server.GetBlockchain(address)
+		b, err := t.server.GetBlockchainBytes()
 		if err != nil {
+			io.WriteString(w, string(http2.JsonStatus("fail")))
 			http.Error(w, "404 not found.", http.StatusMethodNotAllowed)
 			return
 		}
 
 		w.Header().Add("Content-Type", "application/json")
-		m, err := bc.MarshalJSON()
-		if err != nil {
-			http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
-			return
-		}
-		io.WriteString(w, string(m[:]))
+		io.WriteString(w, string(b[:]))
 	default:
 		log.Printf("ERROR: Invalid HTTP Method")
 	}
@@ -61,18 +59,16 @@ func (t *Transporter) HandleTransactions(w http.ResponseWriter, r *http.Request)
 	case http.MethodPut:
 		t.addTransaction(w, r)
 	case http.MethodDelete:
-		count, err := t.server.CleaTransactionPool()
-		if err != nil {
-			io.WriteString(w, "fail")
-			http.Error(w, "something went wrong", http.StatusInternalServerError)
-		}
-
+		count := t.server.CleaTransactionPool()
 		w.Header().Add("Content-Type", "application/json")
 		b, err := json.Marshal(struct {
 			Count int `json:"count"`
 		}{
 			Count: count,
 		})
+		if err != nil {
+
+		}
 		io.WriteString(w, string(b[:]))
 	default:
 		http.Error(w, "page not found", http.StatusBadRequest)
@@ -84,12 +80,12 @@ func (t *Transporter) HandleBalance(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		bcAddress := r.URL.Query().Get("bc_address")
 		if bcAddress == "" {
-			io.WriteString(w, "fail")
+			io.WriteString(w, string(http2.JsonStatus("fail")))
 			http.Error(w, "missing blockchain address", http.StatusBadRequest)
 		}
 		balance, err := t.server.CalculateBalance(bcAddress)
 		if err != nil {
-			io.WriteString(w, "fail")
+			io.WriteString(w, string(http2.JsonStatus("fail")))
 			http.Error(w, "something went wrong", http.StatusInternalServerError)
 		}
 
@@ -108,22 +104,40 @@ func (t *Transporter) HandleBalance(w http.ResponseWriter, r *http.Request) {
 func (t *Transporter) HandleMining(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		bc, err := t.server.GetBlockchain("BLOCKCHAIN")
+		timestamp, mined, err := t.server.Mine()
 		if err != nil {
-			io.WriteString(w, "fail")
-			http.Error(w, "blockchain not found", http.StatusNotFound)
-		}
-		timestamp, err := bc.Mine()
-		if err != nil {
-			io.WriteString(w, "fail")
+			io.WriteString(w, string(http2.JsonStatus("fail")))
 			http.Error(w, "mining failed", http.StatusInternalServerError)
 		}
 
 		w.Header().Add("Content-Type", "application/json")
 		b, err := json.Marshal(struct {
 			Timestamp int64 `json:"timestamp"`
+			Mined     bool  `json:"mined"`
 		}{
-			timestamp,
+			Timestamp: timestamp,
+			Mined:     mined,
+		})
+		io.WriteString(w, string(b[:]))
+	default:
+		http.Error(w, "page not found", http.StatusBadRequest)
+	}
+}
+
+func (t *Transporter) HandleConsensus(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPut:
+		resolved, err := t.server.ResolveConflicts()
+		if err != nil {
+			io.WriteString(w, string(http2.JsonStatus("fail")))
+			http.Error(w, "failed to resolve conflicts", http.StatusInternalServerError)
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		b, err := json.Marshal(struct {
+			Resolved bool `json:"resolved"`
+		}{
+			Resolved: resolved,
 		})
 		io.WriteString(w, string(b[:]))
 	default:
@@ -132,10 +146,7 @@ func (t *Transporter) HandleMining(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
-	ts, err := t.server.GetTransactions()
-	if err != nil {
-		io.WriteString(w, "fail")
-	}
+	ts := t.server.GetTransactions()
 
 	w.Header().Add("Content-Type", "application/json")
 	b, err := json.Marshal(struct {
@@ -145,12 +156,17 @@ func (t *Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
 		Transactions: ts,
 		Lenght:       len(ts),
 	})
+
+	if err != nil {
+
+	}
 	io.WriteString(w, string(b[:]))
 }
 
 func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) {
 	var trReq blockchain.TransactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&trReq); err != nil {
+		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
 		return
 	}
@@ -163,7 +179,7 @@ func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) 
 
 	err := t.server.CreateTransaction(*trReq.SenderPublicKey, *trReq.SenderBlockchainAddress, *trReq.RecipientBlockchainAddress, *trReq.Signature, *trReq.Value)
 	if err != nil {
-		io.WriteString(w, "failed")
+		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "blockchain-server error - failed to create short url", http.StatusInternalServerError)
 		return
 	}
@@ -186,7 +202,7 @@ func (t *Transporter) addTransaction(w http.ResponseWriter, r *http.Request) {
 
 	err := t.server.AddTransaction(*trReq.SenderPublicKey, *trReq.SenderBlockchainAddress, *trReq.RecipientBlockchainAddress, *trReq.Signature, *trReq.Value)
 	if err != nil {
-		io.WriteString(w, "failed")
+		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "blockchain-server error - failed to create short url", http.StatusInternalServerError)
 		return
 	}
