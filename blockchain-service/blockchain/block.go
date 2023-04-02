@@ -49,34 +49,46 @@ func (b *Block) Hash() ([32]byte, error) {
 }
 
 func (b *Block) MarshalJSON() ([]byte, error) {
+
+	tMap := make(map[int]*Transaction)
+	for i, t := range b.GetTransactions() {
+		tMap[i] = t
+	}
+
 	return json.Marshal(struct {
-		Nonce        int            `json:"nonce"`
-		PreviousHash string         `json:"previous_hash"`
-		Timestamp    int64          `json:"timestamp"`
-		Transactions []*Transaction `json:"transactions"`
+		Nonce        int                  `json:"nonce"`
+		PreviousHash string               `json:"previous_hash"`
+		Timestamp    int64                `json:"timestamp"`
+		Transactions map[int]*Transaction `json:"transactions"`
 	}{
 		Nonce:        b.nonce,
 		PreviousHash: fmt.Sprintf("%x", b.previousHash),
 		Timestamp:    b.timestamp,
-		Transactions: b.transactions,
+		Transactions: tMap,
 	})
 }
 
 func (b *Block) UnmarshalJSON(bts []byte) error {
 	var previousHash string
+	var tMap map[int]*Transaction
 	s := struct {
-		Nonce        *int            `json:"nonce"`
-		PreviousHash *string         `json:"previous_hash"`
-		Timestamp    *int64          `json:"timestamp"`
-		Transactions *[]*Transaction `json:"transactions"`
+		Nonce        *int                  `json:"nonce"`
+		PreviousHash *string               `json:"previous_hash"`
+		Timestamp    *int64                `json:"timestamp"`
+		Transactions *map[int]*Transaction `json:"transactions"`
 	}{
 		Nonce:        &b.nonce,
 		PreviousHash: &previousHash,
 		Timestamp:    &b.timestamp,
-		Transactions: &b.transactions,
+		Transactions: &tMap,
 	}
 	if err := json.Unmarshal(bts, &s); err != nil {
 		return err
+	}
+
+	ts := make([]*Transaction, len(tMap))
+	for i, t := range tMap {
+		ts[i] = t
 	}
 
 	ph, err := hex.DecodeString(*s.PreviousHash)

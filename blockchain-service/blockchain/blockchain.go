@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 
@@ -134,8 +135,10 @@ func (bc *Blockchain) ValidChain(chain []*Block) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-
-		if b.GetPreviousHash() != hash {
+		prevHash := b.GetPreviousHash()
+		log.Printf("hash: %s", fmt.Sprintf("%x", hash))
+		log.Printf("prevHash: %s", fmt.Sprintf("%x", prevHash))
+		if prevHash != hash {
 			return false, nil
 		}
 
@@ -212,6 +215,11 @@ func (bc *Blockchain) verifyTransactionSignature(sender *ecdsa.PublicKey, sign *
 }
 
 func (bc *Blockchain) validProof(nonce int, prevHash [32]byte, trs []*Transaction, difficulty int) (bool, error) {
+	log.Printf("nonce: %d", nonce)
+	log.Printf("prevHash: %s", fmt.Sprintf("%x", prevHash))
+	log.Printf("trs: %v", trs)
+	log.Printf("difficulty: %d", difficulty)
+
 	zeros := strings.Repeat("0", difficulty)
 	guessBlock := Block{
 		nonce:        nonce,
@@ -224,6 +232,7 @@ func (bc *Blockchain) validProof(nonce int, prevHash [32]byte, trs []*Transactio
 		return false, nil
 	}
 	gHashString := fmt.Sprintf("%x", hash)
+	log.Printf("gHashString: %s", gHashString)
 	return gHashString[:difficulty] == zeros, nil
 }
 

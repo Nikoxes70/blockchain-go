@@ -47,12 +47,25 @@ type Server struct {
 }
 
 func New(port uint16, bc blockchainer, generateAddressFunc func(pKey *ecdsa.PublicKey) string) *Server {
-	return &Server{
+	s := Server{
 		port:            port,
 		bc:              bc,
 		muxNeighbors:    sync.Mutex{},
 		generateAddress: generateAddressFunc,
 	}
+
+	if _, err := s.SyncNeighbors(); err != nil {
+		log.Printf("Fialed to sinc neighbors on init with err: %s/n", err)
+	}
+
+	if _, err := s.ResolveConflicts(); err != nil {
+		log.Printf("Fialed to resolce conflicts on init with err: %s/n", err)
+	}
+	if _, _, err := s.Mine(); err != nil {
+		log.Printf("Fialed to mine on init with err: %s/n", err)
+	}
+
+	return &s
 }
 
 func (s *Server) GetBlockchainBytes() ([]byte, error) {
@@ -100,8 +113,19 @@ func (s *Server) CalculateBalance(address string) (float32, error) {
 	return s.bc.CalculateBalance(address), nil
 }
 
-func (s *Server) GetTransactions() []*blockchain.Transaction {
-	return s.bc.TransactionPool()
+func (s *Server) GetTransactions() ([]byte, error) {
+	t := s.bc.TransactionPool()
+	b, err := json.Marshal(struct {
+		Transactions []*blockchain.Transaction `json:"transactions"`
+		Lenght       int                       `json:"lenght"`
+	}{
+		Transactions: t,
+		Lenght:       len(t),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
 func (s *Server) CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error {

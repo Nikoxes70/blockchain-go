@@ -12,7 +12,7 @@ import (
 )
 
 type Serverer interface {
-	GetTransactions() []*blockchain.Transaction
+	GetTransactions() ([]byte, error)
 	CalculateBalance(address string) (float32, error)
 	CreateTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
 	AddTransaction(senderPublicKey, senderBlockchainAddress, recipientBlockchainAddress, signature string, amount float32) error
@@ -146,19 +146,11 @@ func (t *Transporter) HandleConsensus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *Transporter) getTransaction(w http.ResponseWriter, r *http.Request) {
-	ts := t.server.GetTransactions()
-
 	w.Header().Add("Content-Type", "application/json")
-	b, err := json.Marshal(struct {
-		Transactions []*blockchain.Transaction `json:"transactions"`
-		Lenght       int                       `json:"lenght"`
-	}{
-		Transactions: ts,
-		Lenght:       len(ts),
-	})
-
+	b, err := t.server.GetTransactions()
 	if err != nil {
-
+		io.WriteString(w, string(http2.JsonStatus("fail")))
+		http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
 	}
 	io.WriteString(w, string(b[:]))
 }
@@ -190,6 +182,7 @@ func (t *Transporter) createTransaction(w http.ResponseWriter, r *http.Request) 
 func (t *Transporter) addTransaction(w http.ResponseWriter, r *http.Request) {
 	var trReq blockchain.TransactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&trReq); err != nil {
+		io.WriteString(w, string(http2.JsonStatus("fail")))
 		http.Error(w, "blockchain-server error - failed to parse request body", http.StatusInternalServerError)
 		return
 	}
